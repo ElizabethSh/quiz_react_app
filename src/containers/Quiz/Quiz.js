@@ -1,5 +1,6 @@
 import { Component } from "react";
 import './Quiz.css';
+import ActiveQuiz from '../../components/ActiveQuiz/ActiveQuiz';
 
 class Quiz extends Component {
   state={
@@ -9,7 +10,10 @@ class Quiz extends Component {
   render() {
     return (
       <div className='Quiz'>
-        <h1>Quiz</h1>
+        <div className="Quiz__wrapper">
+          <h1>Quiz</h1>
+          <ActiveQuiz />
+        </div>
       </div>
     )
   }
