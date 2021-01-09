@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
+import './Layout.css';
 
 class Layout extends Component {
   render() {
     return (
-      <div>
+      <div className="Layout">
 
         <main >
           {this.props.children}
