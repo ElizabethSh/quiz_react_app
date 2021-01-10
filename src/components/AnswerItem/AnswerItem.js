@@ -4,7 +4,9 @@ const AnswerItem = props => {
   return (
     <li 
       className="AnswerItem"
-      onClick={() => props.answerClickHandler(props.answer.id)}
+      onClick={
+        () => props.answerClickHandler(props.answer.id)
+      }
     >
         {props.answer.text}
     </li>
