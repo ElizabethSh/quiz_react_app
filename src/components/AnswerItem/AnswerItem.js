@@ -2,7 +2,12 @@ import './AnswerItem.css';
 
 const AnswerItem = props => {
   return (
-    <li className="AnswerItem">{props.answer.text}</li>
+    <li 
+      className="AnswerItem"
+      onClick={() => props.answerClickHandler(props.answer.id)}
+    >
+        {props.answer.text}
+    </li>
   );
 };
 

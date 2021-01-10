@@ -9,6 +9,7 @@ const AnswerList = props => {
           <AnswerItem 
             key={index}
             answer={answer}
+            answerClickHandler={props.answerClickHandler}
           />
         )}
       )}
