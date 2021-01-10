@@ -5,6 +5,7 @@ import ActiveQuiz from '../../components/ActiveQuiz/ActiveQuiz';
 class Quiz extends Component {
   state = {
     currentQuestion: 0,
+    answerState: null, // состояние ответа, будет объект типа {[answerId]: `success` or `error`}
     quiz: [
       {
         id: `01`,
@@ -35,12 +36,44 @@ class Quiz extends Component {
   // СТРЕЛОЧНАЯ функция! - контекст не будет теряться!!!
   // Если завести обычную - то нужно биндить в конструкторе!
   answerClickHandler = (answerId) => {
-    console.log(`Clicked answer`, answerId);
-    console.log(this.state);
+    const question = this.state.quiz[this.state.currentQuestion]; // получаем объект текущего вопроса
 
-    this.setState({
-      currentQuestion: this.state.currentQuestion + 1
-    })
+    // проверка правильности ответа
+    if (question.correctAnswer === answerId) {
+      // если ответ правильный
+
+      // состояние ответа будет {[answerId]: `success`}
+      // и будет добавлен соответствующий класс
+      this.setState({
+        answerState: {[answerId]: `success`}
+      })
+
+      // устанавливаем таймаут чтобы результат ответа показывался с задержкой
+      const timeout = window.setTimeout(() => {
+
+        // проверка, кончились ли вопросы
+        if (this.isQuizFinished()) {
+          console.log(`finished`);
+        } else {
+          this.setState({
+            currentQuestion: this.state.currentQuestion + 1,
+            answerState: null,
+          })
+        }
+        window.clearTimeout(timeout); // удаление таймаута
+      }, 1000)
+    } else {
+      // если ответ неправильный, то состояние ответа будет
+      // {[answerId]: `error`} и будет добавлен соответствующий класс
+      this.setState({
+        answerState: {[answerId]: `error`}
+      })
+    }
+  }
+
+  // проверяет, есть ли еще вопросы в опроснике
+  isQuizFinished() {
+    return this.state.currentQuestion + 1 === this.state.quiz.length;
   }
 
   render() {
@@ -54,6 +87,7 @@ class Quiz extends Component {
             answerClickHandler={this.answerClickHandler}
             questionAmount={this.state.quiz.length}
             currentQuestion={this.state.currentQuestion + 1}
+            answerState={this.state.answerState}
           />
         </div>
       </div>
