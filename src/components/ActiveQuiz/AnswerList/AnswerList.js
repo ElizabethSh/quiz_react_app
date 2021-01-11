@@ -1,5 +1,5 @@
 import './AnswerList.css';
-import AnswerItem from '../AnswerItem/AnswerItem';
+import AnswerItem from '../AnswerList/AnswerItem/AnswerItem';
 
 const AnswerList = props => {
   return (
