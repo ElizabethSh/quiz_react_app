@@ -1,9 +1,11 @@
 import { Component } from "react";
 import './Quiz.css';
 import ActiveQuiz from '../../components/ActiveQuiz/ActiveQuiz';
+import FinishedQuiz from '../../components/FinishedQuiz/FinishedQuiz';
 
 class Quiz extends Component {
   state = {
+    isQuizFinished: true,
     currentQuestion: 0,
     answerState: null, // состояние ответа, будет объект типа {[answerId]: `success` or `error`}
     quiz: [
@@ -62,7 +64,6 @@ class Quiz extends Component {
     // проверка правильности ответа
     if (question.correctAnswer === answerId) {
       // если ответ правильный
-
       // состояние ответа будет {[answerId]: `success`}
       // и будет добавлен соответствующий класс
       this.setState({
@@ -74,7 +75,7 @@ class Quiz extends Component {
 
         // проверка, кончились ли вопросы
         if (this.isQuizFinished()) {
-          console.log(`finished`);
+          this.setState({isQuizFinished: true})
         } else {
           this.setState({
             currentQuestion: this.state.currentQuestion + 1,
@@ -102,7 +103,9 @@ class Quiz extends Component {
       <div className='Quiz'>
         <div className="Quiz__wrapper">
           <h1>Answer the questions</h1>
-          <ActiveQuiz 
+          {this.state.isQuizFinished
+          ? <FinishedQuiz />
+          : <ActiveQuiz 
             answers={this.state.quiz[this.state.currentQuestion].answers}
             question={this.state.quiz[this.state.currentQuestion].question}
             answerClickHandler={this.answerClickHandler}
@@ -110,6 +113,7 @@ class Quiz extends Component {
             currentQuestion={this.state.currentQuestion + 1}
             answerState={this.state.answerState}
           />
+        }  
         </div>
       </div>
     )
