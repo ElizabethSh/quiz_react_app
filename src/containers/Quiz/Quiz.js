@@ -7,7 +7,7 @@ class Quiz extends Component {
   state = {
     isQuizFinished: true,
     currentQuestion: 0,
-    answerState: null, // состояние ответа, будет объект типа {[answerId]: `success` or `error`}
+    answerState: null, // далее будет объект типа {[answerId]: `success` or `error`}
     quiz: [
       {
         id: `01`,
@@ -33,47 +33,26 @@ class Quiz extends Component {
       },
     ]
   }
-  
 
   // СТРЕЛОЧНАЯ функция! - контекст не будет теряться!!!
   // Если завести обычную - то нужно биндить в конструкторе!
   answerClickHandler = (answerId) => {
-
-    // Исправление бага: если 2 раза нажать на правильный вариант
-    // в первом вопросе, то опрос заканчивается, хотя вопросы еще есть
-    // (за время работы таймера можно успеть нажать 2 раза)
-    // Т.о. нужно перестать обрабатывать клики пока не появится след.вопрос
-    // 1. Проверяем, был ли нажат вариант ответа - есть ли объект в this.state.answerState
     if (this.state.answerState) {
-      // получаем ключ в объекте this.state.answerState
-      // Object.keys() вернет массив с ключами объекта:
-      // ключ будет только одинб поэтому элемент массива будет [0]
       const key = Object.keys(this.state.answerState)[0];
 
-      // если объект есть, проверяем равно ли значение ключа `success`
-      // ключом является номер варианта, по которому произошел клик
       if(this.state.answerState[key] === `success`) {
-        // если равно, то выходим из функции answerClickHandler
         return;
       }
     }
-    // ------------------
 
     const question = this.state.quiz[this.state.currentQuestion]; // получаем объект текущего вопроса
 
-    // проверка правильности ответа
     if (question.correctAnswer === answerId) {
-      // если ответ правильный
-      // состояние ответа будет {[answerId]: `success`}
-      // и будет добавлен соответствующий класс
       this.setState({
         answerState: {[answerId]: `success`}
       })
 
-      // устанавливаем таймаут чтобы результат ответа показывался с задержкой
       const timeout = window.setTimeout(() => {
-
-        // проверка, кончились ли вопросы
         if (this.isQuizFinished()) {
           this.setState({isQuizFinished: true})
         } else {
@@ -82,11 +61,9 @@ class Quiz extends Component {
             answerState: null,
           })
         }
-        window.clearTimeout(timeout); // удаление таймаута
+        window.clearTimeout(timeout);
       }, 1000)
     } else {
-      // если ответ неправильный, то состояние ответа будет
-      // {[answerId]: `error`} и будет добавлен соответствующий класс
       this.setState({
         answerState: {[answerId]: `error`}
       })
