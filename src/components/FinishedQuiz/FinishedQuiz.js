@@ -1,5 +1,6 @@
 import React from 'react';
 import './FinishedQuiz.css';
+import Button from '../UI/Button/Button';
 
 const FinishedQuiz = props => {
   const {results, restartHandler, quiz} = props;
@@ -33,7 +34,14 @@ const FinishedQuiz = props => {
         })}
       </ul>
       <p>Correct answers are {correctAnswers} out of {quiz.length}</p>
-      <button onClick={restartHandler}>Restart</button>
+         <Button type='primary'
+        onClick={restartHandler}
+      >
+        Restart
+      </Button>
+      <Button type='success'>
+        Go to the list of tests
+      </Button>
     </div>
   )
 }
