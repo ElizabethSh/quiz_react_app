@@ -5,75 +5,64 @@ import FinishedQuiz from '../../components/FinishedQuiz/FinishedQuiz';
 
 class Quiz extends Component {
   state = {
-    isQuizFinished: true,
+    results: {}, // 1. заводим пустой объект, далее будет объект типа {[questionId]: `success` or `error`}
+    isQuizFinished: false,
     currentQuestion: 0,
-    answerState: null, // состояние ответа, будет объект типа {[answerId]: `success` or `error`}
+    answerState: null, // далее будет объект типа {[answerId]: `success` or `error`}
     quiz: [
       {
-        id: `01`,
+        id: 1,
         question: `What color is the grass?`,
-        correctAnswer: `3`,
+        correctAnswer: 3,
         answers: [
-          {text: `Black`, id: `1`},
-          {text: `Yellow`, id: `2`},
-          {text: `Green`, id: `3`},
-          {text: `Blue`, id: `4`},
+          {text: `Black`, id: 1},
+          {text: `Yellow`, id: 2},
+          {text: `Green`, id: 3},
+          {text: `Blue`, id: 4},
         ]
       },
       {
-        id: `02`,
+        id: 2,
         question: `What time of year is it now?`,
-        correctAnswer: `1`,
+        correctAnswer: 1,
         answers: [
-          {text: `Winter`, id: `1`},
-          {text: `Spring`, id: `2`},
-          {text: `Summer`, id: `3`},
-          {text: `Autumn`, id: `4`},
+          {text: `Winter`, id: 1},
+          {text: `Spring`, id: 2},
+          {text: `Summer`, id: 3},
+          {text: `Autumn`, id: 4},
         ]
       },
     ]
   }
-  
 
   // СТРЕЛОЧНАЯ функция! - контекст не будет теряться!!!
   // Если завести обычную - то нужно биндить в конструкторе!
   answerClickHandler = (answerId) => {
-
-    // Исправление бага: если 2 раза нажать на правильный вариант
-    // в первом вопросе, то опрос заканчивается, хотя вопросы еще есть
-    // (за время работы таймера можно успеть нажать 2 раза)
-    // Т.о. нужно перестать обрабатывать клики пока не появится след.вопрос
-    // 1. Проверяем, был ли нажат вариант ответа - есть ли объект в this.state.answerState
     if (this.state.answerState) {
-      // получаем ключ в объекте this.state.answerState
-      // Object.keys() вернет массив с ключами объекта:
-      // ключ будет только одинб поэтому элемент массива будет [0]
       const key = Object.keys(this.state.answerState)[0];
 
-      // если объект есть, проверяем равно ли значение ключа `success`
-      // ключом является номер варианта, по которому произошел клик
       if(this.state.answerState[key] === `success`) {
-        // если равно, то выходим из функции answerClickHandler
         return;
       }
     }
-    // ------------------
 
     const question = this.state.quiz[this.state.currentQuestion]; // получаем объект текущего вопроса
+    const results = this.state.results; // 2. Достаем из стейта объект с результатами
 
-    // проверка правильности ответа
     if (question.correctAnswer === answerId) {
-      // если ответ правильный
-      // состояние ответа будет {[answerId]: `success`}
-      // и будет добавлен соответствующий класс
+
+      // 4. Проверяем, есть ли в объекте results с таким ключом какое-то значение:
+      // если есть, то ничего не записываем (значит ответ был неверным и этот результат нужно сохранить)
+      // если нет, значит ответ сразу был правильным и этот результат нужно записать
+      if (!results[question.id]) {
+        results[question.id] = `success`;
+      }
       this.setState({
-        answerState: {[answerId]: `success`}
+        answerState: {[answerId]: `success`},
+        results
       })
 
-      // устанавливаем таймаут чтобы результат ответа показывался с задержкой
       const timeout = window.setTimeout(() => {
-
-        // проверка, кончились ли вопросы
         if (this.isQuizFinished()) {
           this.setState({isQuizFinished: true})
         } else {
@@ -82,15 +71,34 @@ class Quiz extends Component {
             answerState: null,
           })
         }
-        window.clearTimeout(timeout); // удаление таймаута
+        window.clearTimeout(timeout);
       }, 1000)
     } else {
-      // если ответ неправильный, то состояние ответа будет
-      // {[answerId]: `error`} и будет добавлен соответствующий класс
+
+      // 3. если ответ неправильный, то добавляем в объект
+      // ключ с номером вопроса и результат ответа `error`
+      // ------------------------------------------------
+      // ВнИМАНИЕ! Сначала обновляем переменную result, в которую
+      // сохранили this.state.result, а затем уже
+      // в setState добавляем обновленное значение result
+      // c ответом пользователя!
+      results[question.id] = `error`;
       this.setState({
-        answerState: {[answerId]: `error`}
+        answerState: {[answerId]: `error`},
+        results
       })
     }
+  }
+
+  // сбрасывает стейт до изначального
+  // таким образом опрос начинается заново
+  restartHandler = () => {
+    this.setState({
+      isQuizFinished: false,
+      currentQuestion: 0,
+      answerState: null,
+      results: {},
+    });
   }
 
   // проверяет, есть ли еще вопросы в опроснике
@@ -104,8 +112,12 @@ class Quiz extends Component {
         <div className="Quiz__wrapper">
           <h1>Answer the questions</h1>
           {this.state.isQuizFinished
-          ? <FinishedQuiz />
-          : <ActiveQuiz 
+          ? <FinishedQuiz
+            quiz={this.state.quiz}
+            results={this.state.results}  //5. передаем результат ответов на финальный экран
+            restartHandler={this.restartHandler}
+          />
+          : <ActiveQuiz
             answers={this.state.quiz[this.state.currentQuestion].answers}
             question={this.state.quiz[this.state.currentQuestion].question}
             answerClickHandler={this.answerClickHandler}
@@ -113,7 +125,7 @@ class Quiz extends Component {
             currentQuestion={this.state.currentQuestion + 1}
             answerState={this.state.answerState}
           />
-        }  
+        }
         </div>
       </div>
     )
