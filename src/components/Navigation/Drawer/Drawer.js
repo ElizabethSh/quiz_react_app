@@ -1,8 +1,13 @@
 import React, { Component } from 'react';
+import {NavLink} from 'react-router-dom';
 import './Drawer.css';
 import Backdrop from '../../UI/Backdrop/Backdrop';
 
-const links = [1, 2, 3];
+const links = [
+  {to: '/', label: 'Quiz list', exact: true},
+  {to: '/auth', label: 'Autorisation', exact: false},
+  {to: '/quiz-creator', label: 'Create Quiz', exact: false},
+];
 
 class Drawer extends Component {
   renderLinks() {
@@ -10,7 +15,13 @@ class Drawer extends Component {
       links.map((link, index) => {
         return (
           <li key={index}>
-            <a>Link {link}</a>
+            <NavLink to={link.to} 
+              exact={link.exact} 
+              activeClassName={`active`}  // подсветка активной ссылки
+              onClick={this.props.toggleClickHandler} // закрытие сайдбара навигации при выборе ссылки
+            >
+              {link.label}
+            </NavLink>
           </li>
         )
       }) 
