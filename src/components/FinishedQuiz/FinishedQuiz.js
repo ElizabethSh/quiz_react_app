@@ -1,12 +1,13 @@
 import React from 'react';
+import {Link} from 'react-router-dom';
 import './FinishedQuiz.css';
 import Button from '../UI/Button/Button';
 
 const FinishedQuiz = props => {
   const {results, restartHandler, quiz} = props;
 
-  const answers = Object.values(results); // получаем массив с ответами без ключей
-  const correctAnswers = answers.reduce((acc, answer) => {  // считаем сколько из них правильные
+  const answers = Object.values(results);
+  const correctAnswers = answers.reduce((acc, answer) => {
     if (answer === `success`) {
       acc ++;
     }
@@ -34,14 +35,14 @@ const FinishedQuiz = props => {
         })}
       </ul>
       <p>Correct answers are {correctAnswers} out of {quiz.length}</p>
-         <Button type='primary'
+      <Button type='primary'
         onClick={restartHandler}
-      >
-        Restart
-      </Button>
-      <Button type='success'>
-        Go to the list of tests
-      </Button>
+      >Restart</Button>
+
+      {/* добавляем кнопке функционал перехода на страницу со списком опросов */}
+      <Link to='/'>
+        <Button type='success'>Go to the list of quizes</Button>
+      </Link>
     </div>
   )
 }

@@ -106,6 +106,10 @@ class Quiz extends Component {
     return this.state.currentQuestion + 1 === this.state.quiz.length;
   }
 
+  componentDidMount() {
+    console.log(this.props.match.params.id); // выводим id опроса из адресной строки
+  }
+
   render() {
     return (
       <div className='Quiz'>
