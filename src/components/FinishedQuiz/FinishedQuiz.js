@@ -1,4 +1,5 @@
 import React from 'react';
+import {Link} from 'react-router-dom';
 import './FinishedQuiz.css';
 import Button from '../UI/Button/Button';
 
@@ -34,14 +35,14 @@ const FinishedQuiz = props => {
         })}
       </ul>
       <p>Correct answers are {correctAnswers} out of {quiz.length}</p>
-         <Button type='primary'
+      <Button type='primary'
         onClick={restartHandler}
-      >
-        Restart
-      </Button>
-      <Button type='success'>
-        Go to the list of tests
-      </Button>
+      >Restart</Button>
+
+      {/* добавляем кнопке функционал перехода на страницу со списком опросов */}
+      <Link to='/'>
+        <Button type='success'>Go to the list of quizes</Button>
+      </Link>
     </div>
   )
 }
