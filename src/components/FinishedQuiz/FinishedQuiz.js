@@ -5,8 +5,8 @@ import Button from '../UI/Button/Button';
 const FinishedQuiz = props => {
   const {results, restartHandler, quiz} = props;
 
-  const answers = Object.values(results); // получаем массив с ответами без ключей
-  const correctAnswers = answers.reduce((acc, answer) => {  // считаем сколько из них правильные
+  const answers = Object.values(results);
+  const correctAnswers = answers.reduce((acc, answer) => {
     if (answer === `success`) {
       acc ++;
     }
