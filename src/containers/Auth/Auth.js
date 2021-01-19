@@ -3,6 +3,12 @@ import './Auth.css';
 import Button from '../../components/UI/Button/Button';
 import Input from '../../components/UI/Input/Input';
 
+// функция проверяет корректность введенного email
+const validateEmail = email => {
+  const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  return re.test(String(email).toLowerCase());
+}
+
 class Auth extends Component {
 
   // state c контролами формы
@@ -47,8 +53,47 @@ class Auth extends Component {
     e.preventDefault();
   }
 
-  changeHandler = (e, controlNameType) => {
-    console.log(controlNameType, e.target.value);
+  validateControl(value, validation) {
+
+    // если набор параметров validation не передан, то сравнивать не с чем
+    // и контрол валидировать не нужно
+    if (!validation) {
+      return true;
+    }
+
+    let isValid = true;
+
+    // далее в ifах будем переопределять значение isValid:
+    // 1. Проверка что в инпуте что-то есть
+    if (validation.required) {
+      isValid = value.trim() !== `` && isValid; // trim() - удалит пробелы
+    }
+
+    // 2. проверка валидности введенного email
+    if (validation.email) {
+      isValid = validateEmail(value) && isValid;
+    }
+
+    // 3. Проверка минимального кол-ва введенных символов
+    if (validation.minLength) {
+      isValid = value.length >= validation.minLength && isValid;
+    }
+
+    return isValid;
+  }
+
+  changeHandler = (e, controlName) => {
+    const formControls = {...this.state.formControls};  // чтобы не мутировать объект state.formControls сделаем его копию
+
+    const control = {...formControls[controlName]};  // получаем копию объекта текущего контрола
+
+    control.value = e.target.value;
+    control.isTouched = true; // если сработал обработчик значит был произведен ввод в инпут!
+    control.valid = this.validateControl(control.value, control.validation);
+
+    formControls[controlName] = control;
+
+    this.setState({formControls});
   }
 
   // метод, который рендерит инпуты в зависимости от количества контролов
