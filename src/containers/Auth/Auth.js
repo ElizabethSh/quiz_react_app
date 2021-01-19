@@ -13,6 +13,7 @@ class Auth extends Component {
 
   // state c контролами формы
   state = {
+    isFormValid: false,
     formControls: {
       email: {
         type: 'email',
@@ -93,7 +94,22 @@ class Auth extends Component {
 
     formControls[controlName] = control;
 
-    this.setState({formControls});
+    
+    let isFormValid = true; // заводим локальную переменную isFormValid = true
+    
+    // получаем объекты контролов ИЗ КОПИИ this.state.formControls!!!
+    // и в цикле проверяем правильно ли заполнены поля ввода
+    // если правильно то isFormValid = true, иначе - false
+    // если хоть одно поле заполнено не правильно,  isFormValid будет false!!!
+    Object.values(formControls).forEach((controlName) => {
+      isFormValid = controlName.valid && isFormValid;
+    })
+
+    // Object.keys(formControls).forEach((controlName) => {
+    //   isFormValid = formControls[controlName].valid && isFormValid;
+    // })
+
+    this.setState({formControls, isFormValid});
   }
 
   // метод, который рендерит инпуты в зависимости от количества контролов
@@ -132,11 +148,13 @@ class Auth extends Component {
             <Button 
               type='success' 
               onClick={this.loginHandler}
+              disabled={!this.state.isFormValid}  // если state.isFormValid: false кнопка будет заблокирована 
             >Log in</Button>
 
             <Button 
               type='primary' 
               onClick={this.registrHandler}
+              disabled={!this.state.isFormValid} // если state.isFormValid: false кнопка будет заблокирована
             >Register</Button>
           </form>
         </div>
