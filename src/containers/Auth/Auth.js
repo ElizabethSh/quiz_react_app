@@ -1,10 +1,41 @@
 import {React, Component} from 'react';
+import './Auth.css';
+import Button from '../../components/UI/Button/Button';
 
 class Auth extends Component {
+  loginHandler = () => {
+
+  }
+
+  registrHandler = () => {
+
+  }
+
+  submitHandler = (e) => {
+    e.preventDefault();
+  }
+
   render() {
     return(
-      <div>
-        <h1>Auth</h1>
+      <div className={`Auth`}>
+        <div>
+          <h1>Authorization</h1>
+          <form className={`AuthForm`} onSubmit={this.submitHandler}>
+            <input type='text' />
+            <input type='text' />
+
+
+            <Button 
+              type='success' 
+              onClick={this.loginHandler}
+            >Log in</Button>
+
+            <Button 
+              type='primary' 
+              onClick={this.registrHandler}
+            >Register</Button>
+          </form>
+        </div>
       </div>
     )
   }
