@@ -1,8 +1,9 @@
-import {React, Component, Fragment} from 'react';
+import {React, PureComponent, Fragment} from 'react';
 import './QuizCreator.css';
 import Button from '../../components/UI/Button/Button';
 import {createControl} from '../../form/FormFramework/FormFramework';
-import Input from '../../components/UI/Input/Input'
+import Input from '../../components/UI/Input/Input';
+import Select from '../../components/UI/Select/Select';
 
 const createOptionControl = (number) => createControl(
   {
@@ -27,9 +28,10 @@ const createFormControls = () => {
   }
 }
 
-class QuizCreator extends Component {
+class QuizCreator extends PureComponent {
   state = {
     quiz: [],
+    correctAnswerId: 1,
     formControls: createFormControls(),
   }
 
@@ -47,6 +49,12 @@ class QuizCreator extends Component {
 
   changeHandler = (value, control) => {
 
+  }
+
+  selectChangeHandler = (e) => {
+    this.setState({
+      correctAnswerId: +e.target.value
+    })
   }
 
   renderInputs() {
@@ -73,6 +81,26 @@ class QuizCreator extends Component {
   }
 
   render() {
+
+    // создали переменную, чтобы код jsx в return было удобнее читать
+    const select = <Select 
+      label='Выберите правильный ответ'
+
+      // value - необязательный атрибут, 
+          // но если его задать, то при выборе вариантов
+          // в поле селекта текущий вариант не будет изменяться!
+          // Для изменения варианта изменяем state
+          // в обработчике selectChangeHandler
+      value={this.state.correctAnswerId} 
+      options={[
+        {text: 1, value: 1},
+        {text: 2, value: 2},
+        {text: 3, value: 3},
+        {text: 4, value: 4}
+      ]}
+      onChange={this.selectChangeHandler}
+    />
+
     return(
       <div className={'QuizCreator'}>
         <div>
@@ -80,6 +108,8 @@ class QuizCreator extends Component {
           <form onSubmit={this.submitHandler}>
 
             {this.renderInputs()}
+
+            {select}
 
           <Button 
             type='primary' 
@@ -92,7 +122,6 @@ class QuizCreator extends Component {
           >Add quiz</Button>
 
           </form>
-
         </div>
       </div>
     )
