@@ -2,7 +2,6 @@ import React from 'react';
 import './Select.css';
 
 const Select = props => {
-  console.log(props);
   const {
     label,
     value,

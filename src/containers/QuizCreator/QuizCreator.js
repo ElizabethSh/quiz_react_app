@@ -1,7 +1,7 @@
 import {React, PureComponent, Fragment} from 'react';
 import './QuizCreator.css';
 import Button from '../../components/UI/Button/Button';
-import {createControl} from '../../form/FormFramework/FormFramework';
+import {createControl, validateControl, validateForm} from '../../form/FormFramework/FormFramework';
 import Input from '../../components/UI/Input/Input';
 import Select from '../../components/UI/Select/Select';
 
@@ -10,6 +10,7 @@ const createOptionControl = (number) => createControl(
     id: number,
     label: `Option ${number}`,
     errorMessage: 'Insert the option',
+    value: `` // исправление warning: A component is changing an uncontrolled input to be controlled
   }, 
   {required: true}
 );
@@ -20,6 +21,7 @@ const createFormControls = () => {
     question: createControl({
       label: 'Insert the question',
       errorMessage: 'Fill the field',
+      value: `` // исправление warning: A component is changing an uncontrolled input to be controlled
     }, {required: true}),
     option1: createOptionControl(1),
     option2: createOptionControl(2),
@@ -32,6 +34,7 @@ class QuizCreator extends PureComponent {
   state = {
     quiz: [],
     correctAnswerId: 1,
+    isFormValid: false,
     formControls: createFormControls(),
   }
 
@@ -47,8 +50,19 @@ class QuizCreator extends PureComponent {
 
   }
 
-  changeHandler = (value, control) => {
+  changeHandler = (value, controlName) => {
+    const formControls = {...this.state.formControls}
+    const control = {...formControls[controlName]};
 
+    control.isTouched = true;
+    control.value = value;
+    control.valid = validateControl(control.value, control.validation);
+
+    formControls[controlName] = control;
+    this.setState({
+      formControls, 
+      isFormValid: validateForm(formControls),
+    })
   }
 
   selectChangeHandler = (e) => {
@@ -69,7 +83,7 @@ class QuizCreator extends PureComponent {
               value={control.value}
               valid={control.valid}
               shouldValidate={!!control.validation}
-              touched={control.touched}
+              isTouched={control.isTouched}
               errorMessage={control.errorMessage}
               onChange={(e) => this.changeHandler(e.target.value, controlName)}
             />
@@ -114,11 +128,13 @@ class QuizCreator extends PureComponent {
           <Button 
             type='primary' 
             onClick={this.addQuestionHandler}
+            disabled={!this.state.isFormValid}
           >Add question</Button>
 
           <Button 
             type='success' 
             onClick={this.addQuizHandler}
+            disabled={this.state.quiz.length === 0}
           >Add quiz</Button>
 
           </form>

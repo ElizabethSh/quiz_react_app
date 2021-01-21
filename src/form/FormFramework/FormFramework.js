@@ -11,4 +11,30 @@ const createControl = (config, validation) => {
   }
 }
 
-export {createControl};
+// валидирует инпуты в форме добавления опроса
+const validateControl = (value, validation = null) => {
+  if (!validation) {
+    return true;
+  }
+
+  let isValid = true;
+
+  if (validation.required) {
+    isValid = value.trim() !== `` && isValid;
+  }
+
+  return isValid;
+}
+
+// валидирует форму добавления опроса
+const validateForm = (formControls) => {
+  let isFormValid = true;
+
+  Object.keys(formControls).forEach((control) => {
+    isFormValid = formControls[control].valid && isFormValid
+  })
+
+  return isFormValid;
+}
+
+export {createControl, validateControl, validateForm};
