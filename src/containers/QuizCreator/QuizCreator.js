@@ -43,11 +43,53 @@ class QuizCreator extends PureComponent {
   }
 
   addQuestionHandler = () => {
+    console.log(this.props);
+    const quiz = this.state.quiz.concat();  // клонируем массив this.state.quiz
+    const index = this.state.quiz.length + 1; // для задания id вопроса
 
+    const {question, option1, option2, option3, option4} = this.state.formControls;
+
+    // нужно получить объект вопроса
+    // структура была определена в файле Quiz.js,
+    // добавляемый объект вопроса должен содержать те же поля
+    const questionItem = {
+      id: index,
+      question: question.value, // сохраняем то, что введено в поле вопроса
+      correctAnswer: this.state.correctAnswerId,
+      answers: [
+        {
+          text: option1.value, // сохраняем то, что введено в поле варианта ответа
+          id: option1.id  // сохраняем id варианта ответа
+        },
+        {
+          text: option2.value, // сохраняем то, что введено в поле варианта ответа
+          id: option2.id  // сохраняем id варианта ответа
+        },
+        {
+          text: option3.value, // сохраняем то, что введено в поле варианта ответа
+          id: option3.id  // сохраняем id варианта ответа
+        },
+        {
+          text: option4.value, // сохраняем то, что введено в поле варианта ответа
+          id: option4.id  // сохраняем id варианта ответа
+        },
+      ]
+    }
+
+    quiz.push(questionItem);  // добавляем объект вопроса в массив quiz
+
+    this.setState({
+      quiz, // добавляем обновленный массив quiz
+      correctAnswerId: 1, // обнуление state для самоочищения формы
+      isFormValid: false, // обнуление state для самоочищения формы
+      formControls: createFormControls(), // обнуление state для самоочищения формы
+    })
   }
 
-  addQuizHandler = () => {
-
+  addQuizHandler = (e) => {
+    e.preventDefault();
+    console.log(this.state.quiz); // выводим в консоль массив с добавленными вопросами
+    // здесь будет взаимодействие с сервером
   }
 
   changeHandler = (value, controlName) => {
