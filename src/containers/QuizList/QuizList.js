@@ -3,30 +3,50 @@ import {NavLink} from 'react-router-dom';
 import './QuizList.css';
 import axios from 'axios';
 
-const quizList = [1, 2, 3];
-const URL = `https://react-quiz-11101-default-rtdb.europe-west1.firebasedatabase.app/quiz.json`;
+// опросы лежат в папке quizes на сервере
+const URL = `https://react-quiz-11101-default-rtdb.europe-west1.firebasedatabase.app/quizes.json`;
 
 class QuizList extends Component {
+
+  state = {
+    quizes: [],
+  }
 
   // рендерит элементы списка с ссылками на опросы
   renderQuizes() {
     return (
-      quizList.map((quizItem, index) => {
+      this.state.quizes.map((quiz) => { // вместо моковых данных используем данные с сервера
         return (
-          <li key={index}>
+          <li key={quiz.id}>
             <NavLink
-              to={'/quiz/' + quizItem} // динамический адрес - например /quiz/1
-            >Quiz {quizItem}</NavLink>
+              to={'/quiz/' + quiz.id} // динамический адрес - например /quiz/id, по id заберем нужный опрос
+            >{quiz.name}</NavLink>
           </li>
         )
       })
     )
   }
 
-  componentDidMount() {
-    axios.get(URL).then(responce => {
-      console.log(responce);
-    })
+  async componentDidMount() {
+    try {
+      const response = await axios.get(URL);
+      const quizes = []; // создаем локальную переменную quizes
+
+      // преобразовываем полученные данные в мапу quizes с теми данными,
+      // которые нам необходимы для использования в реакт-компонентах
+      Object.keys(response.data).forEach((key, index) => {
+        quizes.push({
+          id: key,  // это криптоключ, который присвоен этому опросу на сервере
+          name: `Quiz №${index + 1}`  // название опроса, которое выведется в списке опросов
+        })
+      })
+
+      this.setState({quizes}); // обновляем state полученной мапой
+    }
+    catch(err) {
+      console.log(err);
+    }
+
   }
 
   render() {
