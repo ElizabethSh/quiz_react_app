@@ -2,6 +2,7 @@ import {React, Component} from 'react';
 import {NavLink} from 'react-router-dom';
 import './QuizList.css';
 import axios from 'axios';
+import Loader from '../../components/UI/Loader/Loader';
 
 // опросы лежат в папке quizes на сервере
 const URL = `https://react-quiz-11101-default-rtdb.europe-west1.firebasedatabase.app/quizes.json`;
@@ -10,6 +11,7 @@ class QuizList extends Component {
 
   state = {
     quizes: [],
+    isLoading: true,
   }
 
   // рендерит элементы списка с ссылками на опросы
@@ -41,7 +43,10 @@ class QuizList extends Component {
         })
       })
 
-      this.setState({quizes}); // обновляем state полученной мапой
+      this.setState({
+        quizes,
+        isLoading: false
+      });
     }
     catch(err) {
       console.log(err);
@@ -55,7 +60,10 @@ class QuizList extends Component {
         <div>
           <h1>Quiz List</h1>
           <ul>
-            {this.renderQuizes()}
+            {this.state.isLoading
+              ? <Loader />
+              : this.renderQuizes()
+            }
           </ul>
         </div>
       </div>
