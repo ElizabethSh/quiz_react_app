@@ -1,9 +1,12 @@
 import {React, PureComponent, Fragment} from 'react';
+import axios from 'axios';
 import './QuizCreator.css';
 import Button from '../../components/UI/Button/Button';
 import {createControl, validateControl, validateForm} from '../../form/FormFramework/FormFramework';
 import Input from '../../components/UI/Input/Input';
 import Select from '../../components/UI/Select/Select';
+
+const postURL = `https://react-quiz-11101-default-rtdb.europe-west1.firebasedatabase.app/quizes.json`;
 
 const createOptionControl = (number) => createControl(
   {
@@ -81,10 +84,41 @@ class QuizCreator extends PureComponent {
     })
   }
 
-  addQuizHandler = (e) => {
+  // 1 способ отправить созданный опрос
+  // addQuizHandler = (e) => {
+  //   e.preventDefault();
+
+  //  axios вернет промис, который можно обработать с помощью
+  //  метода .then и вывести ответ в консоль
+  //  в случае ошибки сработает .catch и ошибку можно вывести в консоль
+  //  axios.post(postURL, this.state.quiz)
+  //    .then(response => console.log(response))
+  //    .catch(error => console.log(error))
+  // }
+
+
+  // 2 способ отправить созданный опрос - асинхронный запрос
+  addQuizHandler = async e => {
     e.preventDefault();
-    console.log(this.state.quiz);
-    // здесь будет взаимодействие с сервером
+
+    try {
+      // axios вернет промис, оператор await распарсит этот промис
+      // и результат положит в переменную response
+      await axios.post(postURL, this.state.quiz)
+
+      // обнуляем state до изначального, чтобы форма создания опроса
+      // возвращалась в изначальное состояние
+      this.setState({
+        quiz: [],
+        correctAnswerId: 1,
+        isFormValid: false,
+        formControls: createFormControls(),
+      })
+    }
+    // в случае ошибки сработает .catch и ошибку можно вывести в консоль
+    catch(error) {
+      console.log(error);
+    }
   }
 
   changeHandler = (value, controlName) => {
