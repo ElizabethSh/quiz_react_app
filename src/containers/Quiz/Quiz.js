@@ -1,7 +1,9 @@
 import { Component } from "react";
+import axios from '../../axios-quiz/axios-quiz';  // импортируем axios из конфига!
 import './Quiz.css';
 import ActiveQuiz from '../../components/ActiveQuiz/ActiveQuiz';
 import FinishedQuiz from '../../components/FinishedQuiz/FinishedQuiz';
+import Loader from '../../components/UI/Loader/Loader';
 
 class Quiz extends Component {
   state = {
@@ -9,30 +11,8 @@ class Quiz extends Component {
     isQuizFinished: false,
     currentQuestion: 0,
     answerState: null,
-    quiz: [
-      {
-        id: 1,
-        question: `What color is the grass?`,
-        correctAnswer: 3,
-        answers: [
-          {text: `Black`, id: 1},
-          {text: `Yellow`, id: 2},
-          {text: `Green`, id: 3},
-          {text: `Blue`, id: 4},
-        ]
-      },
-      {
-        id: 2,
-        question: `What time of year is it now?`,
-        correctAnswer: 1,
-        answers: [
-          {text: `Winter`, id: 1},
-          {text: `Spring`, id: 2},
-          {text: `Summer`, id: 3},
-          {text: `Autumn`, id: 4},
-        ]
-      },
-    ]
+    quiz: [],  // удаляем моковые данные опросаб
+    isLoading: true // заводим state для отображения loadera
   }
 
   answerClickHandler = (answerId) => {
@@ -92,8 +72,43 @@ class Quiz extends Component {
     return this.state.currentQuestion + 1 === this.state.quiz.length;
   }
 
-  componentDidMount() {
-    console.log(this.props.match.params.id);
+  async componentDidMount() {
+    try {
+      // получаем объект запроса по конкретному id опроса (хэшу опроса на сервере)
+      const response = await axios.get(`/quizes/${this.props.match.params.id}.json/`);
+
+      // создаем переменную и кладем в нее полученный объект с опросом
+      const quiz = response.data;
+
+      // обновляем state: добавляем туда объект опроса и меняем флаг что данные получены
+      this.setState({
+        quiz,
+        isLoading: false
+      })
+    }
+    catch(err) {
+      console.log(err);
+    }
+  }
+
+  // метод который отображает либо экран с вопросом либо финальный экран с результатами ответов
+  renderScreen() {
+    return (
+      this.state.isQuizFinished
+        ? <FinishedQuiz
+          quiz={this.state.quiz}
+          results={this.state.results}
+          restartHandler={this.restartHandler}
+        />
+        : <ActiveQuiz
+          answers={this.state.quiz[this.state.currentQuestion].answers}
+          question={this.state.quiz[this.state.currentQuestion].question}
+          answerClickHandler={this.answerClickHandler}
+          questionAmount={this.state.quiz.length}
+          currentQuestion={this.state.currentQuestion + 1}
+          answerState={this.state.answerState}
+        />
+    )
   }
 
   render() {
@@ -101,20 +116,11 @@ class Quiz extends Component {
       <div className='Quiz'>
         <div className="Quiz__wrapper">
           <h1>Answer the questions</h1>
-          {this.state.isQuizFinished
-            ? <FinishedQuiz
-              quiz={this.state.quiz}
-              results={this.state.results}
-              restartHandler={this.restartHandler}
-            />
-            : <ActiveQuiz
-              answers={this.state.quiz[this.state.currentQuestion].answers}
-              question={this.state.quiz[this.state.currentQuestion].question}
-              answerClickHandler={this.answerClickHandler}
-              questionAmount={this.state.quiz.length}
-              currentQuestion={this.state.currentQuestion + 1}
-              answerState={this.state.answerState}
-            />
+
+          {/* в зависимости от того, загрузились ли данные рендерим либо Loader либо какой-то из экранов */}
+          {this.state.isLoading
+            ? <Loader />
+            : this.renderScreen()
           }
         </div>
       </div>

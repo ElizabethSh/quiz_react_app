@@ -1,11 +1,10 @@
 import {React, Component} from 'react';
 import {NavLink} from 'react-router-dom';
 import './QuizList.css';
-import axios from 'axios';
+import axios from '../../axios-quiz/axios-quiz';
 import Loader from '../../components/UI/Loader/Loader';
 
-// опросы лежат в папке quizes на сервере
-const URL = `https://react-quiz-11101-default-rtdb.europe-west1.firebasedatabase.app/quizes.json`;
+// удаляем более не нужную переменную
 
 class QuizList extends Component {
 
@@ -31,7 +30,7 @@ class QuizList extends Component {
 
   async componentDidMount() {
     try {
-      const response = await axios.get(URL);
+      const response = await axios.get(`/quizes.json`);  // используем конфиг axios-quiz - полный путь можно не указывать
       const quizes = []; // создаем локальную переменную quizes
 
       // преобразовываем полученные данные в мапу quizes с теми данными,

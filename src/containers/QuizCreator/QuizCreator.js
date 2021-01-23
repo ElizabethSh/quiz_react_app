@@ -1,12 +1,10 @@
 import {React, PureComponent, Fragment} from 'react';
-import axios from 'axios';
 import './QuizCreator.css';
 import Button from '../../components/UI/Button/Button';
 import {createControl, validateControl, validateForm} from '../../form/FormFramework/FormFramework';
 import Input from '../../components/UI/Input/Input';
 import Select from '../../components/UI/Select/Select';
-
-const postURL = `https://react-quiz-11101-default-rtdb.europe-west1.firebasedatabase.app/quizes.json`;
+import axios from '../../axios-quiz/axios-quiz';
 
 const createOptionControl = (number) => createControl(
   {
@@ -104,7 +102,7 @@ class QuizCreator extends PureComponent {
     try {
       // axios вернет промис, оператор await распарсит этот промис
       // и результат положит в переменную response
-      await axios.post(postURL, this.state.quiz)
+      await axios.post(`/quizes.json`, this.state.quiz) // используем конфиг axios-quiz - полный путь можно не указывать
 
       // обнуляем state до изначального, чтобы форма создания опроса
       // возвращалась в изначальное состояние
