@@ -4,24 +4,24 @@ import Button from '../../components/UI/Button/Button';
 import {createControl, validateControl, validateForm} from '../../form/FormFramework/FormFramework';
 import Input from '../../components/UI/Input/Input';
 import Select from '../../components/UI/Select/Select';
+import axios from '../../axios-quiz/axios-quiz';
 
 const createOptionControl = (number) => createControl(
   {
     id: number,
     label: `Option ${number}`,
     errorMessage: 'Insert the option',
-    value: `` // исправление warning: A component is changing an uncontrolled input to be controlled
+    value: ``,
   }, 
   {required: true}
 );
 
-// функция будет создавать объект state.formControls заново
 const createFormControls = () => {
   return {
     question: createControl({
       label: 'Insert the question',
       errorMessage: 'Fill the field',
-      value: `` // исправление warning: A component is changing an uncontrolled input to be controlled
+      value: ``,
     }, {required: true}),
     option1: createOptionControl(1),
     option2: createOptionControl(2),
@@ -43,53 +43,80 @@ class QuizCreator extends PureComponent {
   }
 
   addQuestionHandler = () => {
-    console.log(this.props);
-    const quiz = this.state.quiz.concat();  // клонируем массив this.state.quiz
-    const index = this.state.quiz.length + 1; // для задания id вопроса
+    const quiz = this.state.quiz.concat();
+    const index = this.state.quiz.length + 1;
 
     const {question, option1, option2, option3, option4} = this.state.formControls;
 
-    // нужно получить объект вопроса
-    // структура была определена в файле Quiz.js,
-    // добавляемый объект вопроса должен содержать те же поля
     const questionItem = {
       id: index,
-      question: question.value, // сохраняем то, что введено в поле вопроса
+      question: question.value,
       correctAnswer: this.state.correctAnswerId,
       answers: [
         {
-          text: option1.value, // сохраняем то, что введено в поле варианта ответа
-          id: option1.id  // сохраняем id варианта ответа
+          text: option1.value,
+          id: option1.id,
         },
         {
-          text: option2.value, // сохраняем то, что введено в поле варианта ответа
-          id: option2.id  // сохраняем id варианта ответа
+          text: option2.value,
+          id: option2.id,
         },
         {
-          text: option3.value, // сохраняем то, что введено в поле варианта ответа
-          id: option3.id  // сохраняем id варианта ответа
+          text: option3.value,
+          id: option3.id,
         },
         {
-          text: option4.value, // сохраняем то, что введено в поле варианта ответа
-          id: option4.id  // сохраняем id варианта ответа
+          text: option4.value,
+          id: option4.id,
         },
       ]
     }
 
-    quiz.push(questionItem);  // добавляем объект вопроса в массив quiz
+    quiz.push(questionItem);
 
     this.setState({
-      quiz, // добавляем обновленный массив quiz
-      correctAnswerId: 1, // обнуление state для самоочищения формы
-      isFormValid: false, // обнуление state для самоочищения формы
-      formControls: createFormControls(), // обнуление state для самоочищения формы
+      quiz,
+      correctAnswerId: 1,
+      isFormValid: false,
+      formControls: createFormControls(),
     })
   }
 
-  addQuizHandler = (e) => {
+  // 1 способ отправить созданный опрос
+  // addQuizHandler = (e) => {
+  //   e.preventDefault();
+
+  //  axios вернет промис, который можно обработать с помощью
+  //  метода .then и вывести ответ в консоль
+  //  в случае ошибки сработает .catch и ошибку можно вывести в консоль
+  //  axios.post(postURL, this.state.quiz)
+  //    .then(response => console.log(response))
+  //    .catch(error => console.log(error))
+  // }
+
+
+  // 2 способ отправить созданный опрос - асинхронный запрос
+  addQuizHandler = async e => {
     e.preventDefault();
-    console.log(this.state.quiz); // выводим в консоль массив с добавленными вопросами
-    // здесь будет взаимодействие с сервером
+
+    try {
+      // axios вернет промис, оператор await распарсит этот промис
+      // и результат положит в переменную response
+      await axios.post(`/quizes.json`, this.state.quiz) // используем конфиг axios-quiz - полный путь можно не указывать
+
+      // обнуляем state до изначального, чтобы форма создания опроса
+      // возвращалась в изначальное состояние
+      this.setState({
+        quiz: [],
+        correctAnswerId: 1,
+        isFormValid: false,
+        formControls: createFormControls(),
+      })
+    }
+    // в случае ошибки сработает .catch и ошибку можно вывести в консоль
+    catch(error) {
+      console.log(error);
+    }
   }
 
   changeHandler = (value, controlName) => {
@@ -102,7 +129,7 @@ class QuizCreator extends PureComponent {
 
     formControls[controlName] = control;
     this.setState({
-      formControls, 
+      formControls,
       isFormValid: validateForm(formControls),
     })
   }
@@ -137,22 +164,14 @@ class QuizCreator extends PureComponent {
   }
 
   render() {
-
-    // создали переменную, чтобы код jsx в return было удобнее читать
     const select = <Select 
       label='Выберите правильный ответ'
-
-      // value - необязательный атрибут, 
-          // но если его задать, то при выборе вариантов
-          // в поле селекта текущий вариант не будет изменяться!
-          // Для изменения варианта изменяем state
-          // в обработчике selectChangeHandler
-      value={this.state.correctAnswerId} 
+      value={this.state.correctAnswerId}
       options={[
         {text: 1, value: 1},
         {text: 2, value: 2},
         {text: 3, value: 3},
-        {text: 4, value: 4}
+        {text: 4, value: 4},
       ]}
       onChange={this.selectChangeHandler}
     />
@@ -167,18 +186,17 @@ class QuizCreator extends PureComponent {
 
             {select}
 
-          <Button 
-            type='primary' 
-            onClick={this.addQuestionHandler}
-            disabled={!this.state.isFormValid}
-          >Add question</Button>
+            <Button
+              type='primary'
+              onClick={this.addQuestionHandler}
+              disabled={!this.state.isFormValid}
+            >Add question</Button>
 
-          <Button 
-            type='success' 
-            onClick={this.addQuizHandler}
-            disabled={this.state.quiz.length === 0}
-          >Add quiz</Button>
-
+            <Button
+              type='success'
+              onClick={this.addQuizHandler}
+              disabled={this.state.quiz.length === 0}
+            >Add quiz</Button>
           </form>
         </div>
       </div>
