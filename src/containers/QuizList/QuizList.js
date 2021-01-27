@@ -1,19 +1,17 @@
 import {React, Component} from 'react';
 import {NavLink} from 'react-router-dom';
 import './QuizList.css';
-import axios from '../../axios-quiz/axios-quiz';
 import Loader from '../../components/UI/Loader/Loader';
+import { connect } from 'react-redux';
+import fetchQuizAction from '../../store/actions/quiz-action-creator';
 
 class QuizList extends Component {
-
-  state = {
-    quizes: [],
-    isLoading: true,
-  }
-
+  // удаляем более не нужный state
+  // теперь он находится в редьюсере quizReducer
   renderQuizes() {
     return (
-      this.state.quizes.map((quiz) => {
+      // обращаемся не к state а к props
+      this.props.quizes.map((quiz) => {
         return (
           <li key={quiz.id}>
             <NavLink
@@ -25,26 +23,10 @@ class QuizList extends Component {
     )
   }
 
-  async componentDidMount() {
-    try {
-      const response = await axios.get(`/quizes.json`);
-      const quizes = [];
-
-      Object.keys(response.data).forEach((key, index) => {
-        quizes.push({
-          id: key,
-          name: `Quiz №${index + 1}`,
-        })
-      })
-
-      this.setState({
-        quizes,
-        isLoading: false,
-      });
-    } catch(err) {
-      console.log(err);
-    }
-
+  componentDidMount() {
+    // теперь загрузка данных не происходит в react компоненте
+    // т.о. бизнес-логика отделена от отображения
+    this.props.fetchQuizes();
   }
 
   render() {
@@ -53,7 +35,8 @@ class QuizList extends Component {
         <div>
           <h1>Quiz List</h1>
           <ul>
-            {this.state.isLoading
+          {/* обращаемся не к state а к props и добавляем доп.условие*/}
+            {this.props.isLoading && this.props.quizes.length !== 0
               ? <Loader />
               : this.renderQuizes()
             }
@@ -64,4 +47,21 @@ class QuizList extends Component {
   }
 }
 
-export default QuizList;
+const mapStateToProps = (state) => {
+  return {
+    quizes: state.quizReducer.quizes,
+    isLoading: state.quizReducer.isLoading,
+  }
+}
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    // создаем функцию fetchQuizes, которая в методе componentDidMount
+    // будет диспатчить функцию, которая в зависимости от ситуации
+    // будет вызывать соответствующие actionCreatorы
+    fetchQuizes: () => dispatch(fetchQuizAction()),
+  }
+}
+
+// связываем компонент с redux
+export default connect(mapStateToProps, mapDispatchToProps)(QuizList);
