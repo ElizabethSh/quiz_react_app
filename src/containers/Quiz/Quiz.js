@@ -1,5 +1,5 @@
 import { Component } from "react";
-import axios from '../../axios-quiz/axios-quiz';  // импортируем axios из конфига!
+import axios from '../../axios-quiz/axios-quiz';
 import './Quiz.css';
 import ActiveQuiz from '../../components/ActiveQuiz/ActiveQuiz';
 import FinishedQuiz from '../../components/FinishedQuiz/FinishedQuiz';
@@ -11,8 +11,8 @@ class Quiz extends Component {
     isQuizFinished: false,
     currentQuestion: 0,
     answerState: null,
-    quiz: [],  // удаляем моковые данные опросаб
-    isLoading: true // заводим state для отображения loadera
+    quiz: [],
+    isLoading: true,
   }
 
   answerClickHandler = (answerId) => {
@@ -56,8 +56,6 @@ class Quiz extends Component {
     }
   }
 
-  // сбрасывает стейт до изначального
-  // таким образом опрос начинается заново
   restartHandler = () => {
     this.setState({
       isQuizFinished: false,
@@ -67,20 +65,15 @@ class Quiz extends Component {
     });
   }
 
-  // проверяет, есть ли еще вопросы в опроснике
   isQuizFinished() {
     return this.state.currentQuestion + 1 === this.state.quiz.length;
   }
 
   async componentDidMount() {
     try {
-      // получаем объект запроса по конкретному id опроса (хэшу опроса на сервере)
       const response = await axios.get(`/quizes/${this.props.match.params.id}.json/`);
-
-      // создаем переменную и кладем в нее полученный объект с опросом
       const quiz = response.data;
 
-      // обновляем state: добавляем туда объект опроса и меняем флаг что данные получены
       this.setState({
         quiz,
         isLoading: false
@@ -91,7 +84,6 @@ class Quiz extends Component {
     }
   }
 
-  // метод который отображает либо экран с вопросом либо финальный экран с результатами ответов
   renderScreen() {
     return (
       this.state.isQuizFinished
@@ -117,7 +109,6 @@ class Quiz extends Component {
         <div className="Quiz__wrapper">
           <h1>Answer the questions</h1>
 
-          {/* в зависимости от того, загрузились ли данные рендерим либо Loader либо какой-то из экранов */}
           {this.state.isLoading
             ? <Loader />
             : this.renderScreen()

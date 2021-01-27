@@ -17,8 +17,8 @@ class Drawer extends Component {
           <li key={index}>
             <NavLink to={link.to} 
               exact={link.exact} 
-              activeClassName={`active`}  // подсветка активной ссылки
-              onClick={this.props.toggleClickHandler} // закрытие сайдбара навигации при выборе ссылки
+              activeClassName={`active`}
+              onClick={this.props.toggleClickHandler}
             >
               {link.label}
             </NavLink>

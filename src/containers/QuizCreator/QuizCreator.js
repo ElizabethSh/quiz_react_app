@@ -82,39 +82,19 @@ class QuizCreator extends PureComponent {
     })
   }
 
-  // 1 способ отправить созданный опрос
-  // addQuizHandler = (e) => {
-  //   e.preventDefault();
-
-  //  axios вернет промис, который можно обработать с помощью
-  //  метода .then и вывести ответ в консоль
-  //  в случае ошибки сработает .catch и ошибку можно вывести в консоль
-  //  axios.post(postURL, this.state.quiz)
-  //    .then(response => console.log(response))
-  //    .catch(error => console.log(error))
-  // }
-
-
-  // 2 способ отправить созданный опрос - асинхронный запрос
   addQuizHandler = async e => {
     e.preventDefault();
 
     try {
-      // axios вернет промис, оператор await распарсит этот промис
-      // и результат положит в переменную response
-      await axios.post(`/quizes.json`, this.state.quiz) // используем конфиг axios-quiz - полный путь можно не указывать
+      await axios.post(`/quizes.json`, this.state.quiz)
 
-      // обнуляем state до изначального, чтобы форма создания опроса
-      // возвращалась в изначальное состояние
       this.setState({
         quiz: [],
         correctAnswerId: 1,
         isFormValid: false,
         formControls: createFormControls(),
       })
-    }
-    // в случае ошибки сработает .catch и ошибку можно вывести в консоль
-    catch(error) {
+    } catch(error) {
       console.log(error);
     }
   }

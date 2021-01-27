@@ -18,11 +18,9 @@ const FinishedQuiz = props => {
     <div className='FinishedQuiz'>
       <ul>
         {quiz.map((quizItem, index) => {
-
-          // формируем имя класса для отображения и оформления иконок
-          const classes = [`fa`,  // обязательный префикс
-          results[quizItem.id] === `error` ? `fa-times` : `fa-check`, // крестик или галка
-          results[quizItem.id]  // добавление класса success или error
+          const classes = [`fa`,
+          results[quizItem.id] === `error` ? `fa-times` : `fa-check`,
+          results[quizItem.id]
           ];
 
           return (
@@ -35,11 +33,11 @@ const FinishedQuiz = props => {
         })}
       </ul>
       <p>Correct answers are {correctAnswers} out of {quiz.length}</p>
+      
       <Button type='primary'
         onClick={restartHandler}
       >Restart</Button>
 
-      {/* добавляем кнопке функционал перехода на страницу со списком опросов */}
       <Link to='/'>
         <Button type='success'>Go to the list of quizes</Button>
       </Link>

@@ -4,8 +4,6 @@ import './QuizList.css';
 import axios from '../../axios-quiz/axios-quiz';
 import Loader from '../../components/UI/Loader/Loader';
 
-// удаляем более не нужную переменную
-
 class QuizList extends Component {
 
   state = {
@@ -13,14 +11,13 @@ class QuizList extends Component {
     isLoading: true,
   }
 
-  // рендерит элементы списка с ссылками на опросы
   renderQuizes() {
     return (
-      this.state.quizes.map((quiz) => { // вместо моковых данных используем данные с сервера
+      this.state.quizes.map((quiz) => {
         return (
           <li key={quiz.id}>
             <NavLink
-              to={'/quiz/' + quiz.id} // динамический адрес - например /quiz/id, по id заберем нужный опрос
+              to={'/quiz/' + quiz.id}
             >{quiz.name}</NavLink>
           </li>
         )
@@ -30,24 +27,21 @@ class QuizList extends Component {
 
   async componentDidMount() {
     try {
-      const response = await axios.get(`/quizes.json`);  // используем конфиг axios-quiz - полный путь можно не указывать
-      const quizes = []; // создаем локальную переменную quizes
+      const response = await axios.get(`/quizes.json`);
+      const quizes = [];
 
-      // преобразовываем полученные данные в мапу quizes с теми данными,
-      // которые нам необходимы для использования в реакт-компонентах
       Object.keys(response.data).forEach((key, index) => {
         quizes.push({
-          id: key,  // это криптоключ, который присвоен этому опросу на сервере
-          name: `Quiz №${index + 1}`  // название опроса, которое выведется в списке опросов
+          id: key,
+          name: `Quiz №${index + 1}`,
         })
       })
 
       this.setState({
         quizes,
-        isLoading: false
+        isLoading: false,
       });
-    }
-    catch(err) {
+    } catch(err) {
       console.log(err);
     }
 
