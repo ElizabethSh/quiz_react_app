@@ -3,7 +3,7 @@ import {NavLink} from 'react-router-dom';
 import './QuizList.css';
 import Loader from '../../components/UI/Loader/Loader';
 import { connect } from 'react-redux';
-import fetchQuizAction from '../../store/actions/quiz-action-creator';
+import {fetchQuizesAction} from '../../store/actions/quiz-action-creator';
 
 class QuizList extends Component {
   // удаляем более не нужный state
@@ -59,7 +59,7 @@ const mapDispatchToProps = (dispatch) => {
     // создаем функцию fetchQuizes, которая в методе componentDidMount
     // будет диспатчить функцию, которая в зависимости от ситуации
     // будет вызывать соответствующие actionCreatorы
-    fetchQuizes: () => dispatch(fetchQuizAction()),
+    fetchQuizes: () => dispatch(fetchQuizesAction()),
   }
 }
 

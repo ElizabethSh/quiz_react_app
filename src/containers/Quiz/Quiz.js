@@ -1,20 +1,13 @@
 import { Component } from "react";
-import axios from '../../axios-quiz/axios-quiz';
 import './Quiz.css';
 import ActiveQuiz from '../../components/ActiveQuiz/ActiveQuiz';
 import FinishedQuiz from '../../components/FinishedQuiz/FinishedQuiz';
 import Loader from '../../components/UI/Loader/Loader';
+import { connect } from "react-redux";
+import {fetchQuizAction} from '../../store/actions/quiz-action-creator';
 
 class Quiz extends Component {
-  state = {
-    results: {},
-    isQuizFinished: false,
-    currentQuestion: 0,
-    answerState: null,
-    quiz: [],
-    isLoading: true,
-  }
-
+  // 1. Переносим поля state в initialState в файле quiz-reduser.js
   answerClickHandler = (answerId) => {
     if (this.state.answerState) {
       const key = Object.keys(this.state.answerState)[0];
@@ -66,39 +59,32 @@ class Quiz extends Component {
   }
 
   isQuizFinished() {
-    return this.state.currentQuestion + 1 === this.state.quiz.length;
+    return this.props.currentQuestion + 1 === this.props.quiz.length;
   }
 
-  async componentDidMount() {
-    try {
-      const response = await axios.get(`/quizes/${this.props.match.params.id}.json/`);
-      const quiz = response.data;
-
-      this.setState({
-        quiz,
-        isLoading: false
-      })
-    }
-    catch(err) {
-      console.log(err);
-    }
+  componentDidMount() {
+    // 5. Вызываем функцию загрузки данных и передаем в нее id опроса
+    // который нужно загрузить
+    this.props.fetchQuizById(this.props.match.params.id);
   }
 
   renderScreen() {
+    // 9. Теперь обращаемся к props, а не state
+    // а здесь quiz уже чему-то равен, если загрузка прошла успешно!!!
     return (
-      this.state.isQuizFinished
+      this.props.isQuizFinished
         ? <FinishedQuiz
-          quiz={this.state.quiz}
-          results={this.state.results}
+          quiz={this.props.quiz}
+          results={this.props.results}
           restartHandler={this.restartHandler}
         />
         : <ActiveQuiz
-          answers={this.state.quiz[this.state.currentQuestion].answers}
-          question={this.state.quiz[this.state.currentQuestion].question}
+          answers={this.props.quiz[this.props.currentQuestion].answers}
+          question={this.props.quiz[this.props.currentQuestion].question}
           answerClickHandler={this.answerClickHandler}
-          questionAmount={this.state.quiz.length}
-          currentQuestion={this.state.currentQuestion + 1}
-          answerState={this.state.answerState}
+          questionAmount={this.props.quiz.length}
+          currentQuestion={this.props.currentQuestion + 1}
+          answerState={this.props.answerState}
         />
     )
   }
@@ -109,7 +95,15 @@ class Quiz extends Component {
         <div className="Quiz__wrapper">
           <h1>Answer the questions</h1>
 
-          {this.state.isLoading
+          {/* 9. Теперь обращаемся к props, а не state.
+              Добавляем доп. условие:
+                Если сейчас происходит загрузка ИЛИ нет параметра quiz
+              то загружаем Loader.
+                Если  какое то из условий не выполняется
+              то рендерим экран с вопросом
+              перед загрузкой quiz равен null!!!
+              */}
+          {this.props.isLoading || !this.props.quiz
             ? <Loader />
             : this.renderScreen()
           }
@@ -119,4 +113,25 @@ class Quiz extends Component {
   }
 }
 
-export default Quiz;
+// 3. Достаем props из редьюсера
+const mapStateToProps = (state) => {
+  return {
+    results: state.quizReducer.results,
+    isQuizFinished: state.quizReducer.isQuizFinished,
+    currentQuestion: state.quizReducer.currentQuestion,
+    answerState: state.quizReducer.answerState,
+    quiz: state.quizReducer.quiz,
+    isLoading: state.quizReducer.isLoading,
+  }
+}
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    // 4. Создаем функцию, которая будет вызывать
+    // загрузку опроса по его id
+    fetchQuizById: (id) => dispatch(fetchQuizAction(id))
+  }
+}
+
+// 2. связываем компонент с редьюсером
+export default connect(mapStateToProps, mapDispatchToProps)(Quiz);
