@@ -7,7 +7,6 @@ import { connect } from "react-redux";
 import {fetchQuizAction} from '../../store/actions/quiz-action-creator';
 
 class Quiz extends Component {
-  // 1. Переносим поля state в initialState в файле quiz-reduser.js
   answerClickHandler = (answerId) => {
     if (this.state.answerState) {
       const key = Object.keys(this.state.answerState)[0];
@@ -63,14 +62,10 @@ class Quiz extends Component {
   }
 
   componentDidMount() {
-    // 5. Вызываем функцию загрузки данных и передаем в нее id опроса
-    // который нужно загрузить
     this.props.fetchQuizById(this.props.match.params.id);
   }
 
   renderScreen() {
-    // 9. Теперь обращаемся к props, а не state
-    // а здесь quiz уже чему-то равен, если загрузка прошла успешно!!!
     return (
       this.props.isQuizFinished
         ? <FinishedQuiz
@@ -95,14 +90,6 @@ class Quiz extends Component {
         <div className="Quiz__wrapper">
           <h1>Answer the questions</h1>
 
-          {/* 9. Теперь обращаемся к props, а не state.
-              Добавляем доп. условие:
-                Если сейчас происходит загрузка ИЛИ нет параметра quiz
-              то загружаем Loader.
-                Если  какое то из условий не выполняется
-              то рендерим экран с вопросом
-              перед загрузкой quiz равен null!!!
-              */}
           {this.props.isLoading || !this.props.quiz
             ? <Loader />
             : this.renderScreen()
@@ -113,7 +100,6 @@ class Quiz extends Component {
   }
 }
 
-// 3. Достаем props из редьюсера
 const mapStateToProps = (state) => {
   return {
     results: state.quizReducer.results,
@@ -127,11 +113,8 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    // 4. Создаем функцию, которая будет вызывать
-    // загрузку опроса по его id
     fetchQuizById: (id) => dispatch(fetchQuizAction(id))
   }
 }
 
-// 2. связываем компонент с редьюсером
 export default connect(mapStateToProps, mapDispatchToProps)(Quiz);

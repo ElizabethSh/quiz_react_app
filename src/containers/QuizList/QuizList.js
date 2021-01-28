@@ -6,11 +6,8 @@ import { connect } from 'react-redux';
 import {fetchQuizesAction} from '../../store/actions/quiz-action-creator';
 
 class QuizList extends Component {
-  // удаляем более не нужный state
-  // теперь он находится в редьюсере quizReducer
   renderQuizes() {
     return (
-      // обращаемся не к state а к props
       this.props.quizes.map((quiz) => {
         return (
           <li key={quiz.id}>
@@ -24,8 +21,6 @@ class QuizList extends Component {
   }
 
   componentDidMount() {
-    // теперь загрузка данных не происходит в react компоненте
-    // т.о. бизнес-логика отделена от отображения
     this.props.fetchQuizes();
   }
 
@@ -35,7 +30,6 @@ class QuizList extends Component {
         <div>
           <h1>Quiz List</h1>
           <ul>
-          {/* обращаемся не к state а к props и добавляем доп.условие*/}
             {this.props.isLoading && this.props.quizes.length !== 0
               ? <Loader />
               : this.renderQuizes()
@@ -56,12 +50,8 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    // создаем функцию fetchQuizes, которая в методе componentDidMount
-    // будет диспатчить функцию, которая в зависимости от ситуации
-    // будет вызывать соответствующие actionCreatorы
     fetchQuizes: () => dispatch(fetchQuizesAction()),
   }
 }
 
-// связываем компонент с redux
 export default connect(mapStateToProps, mapDispatchToProps)(QuizList);
