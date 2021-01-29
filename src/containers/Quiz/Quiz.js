@@ -4,65 +4,23 @@ import ActiveQuiz from '../../components/ActiveQuiz/ActiveQuiz';
 import FinishedQuiz from '../../components/FinishedQuiz/FinishedQuiz';
 import Loader from '../../components/UI/Loader/Loader';
 import { connect } from "react-redux";
-import {fetchQuizAction} from '../../store/actions/quiz-action-creator';
+import {
+  fetchQuizAction,
+  restartQuiz,
+  checkAnswer,
+} from '../../store/actions/quiz-action-creator';
 
 class Quiz extends Component {
-  answerClickHandler = (answerId) => {
-    if (this.state.answerState) {
-      const key = Object.keys(this.state.answerState)[0];
-
-      if(this.state.answerState[key] === `success`) {
-        return;
-      }
-    }
-
-    const question = this.state.quiz[this.state.currentQuestion];
-    const results = this.state.results;
-
-    if (question.correctAnswer === answerId) {
-      if (!results[question.id]) {
-        results[question.id] = `success`;
-      }
-      this.setState({
-        answerState: {[answerId]: `success`},
-        results
-      })
-
-      const timeout = window.setTimeout(() => {
-        if (this.isQuizFinished()) {
-          this.setState({isQuizFinished: true})
-        } else {
-          this.setState({
-            currentQuestion: this.state.currentQuestion + 1,
-            answerState: null,
-          })
-        }
-        window.clearTimeout(timeout);
-      }, 1000)
-    } else {
-      results[question.id] = `error`;
-      this.setState({
-        answerState: {[answerId]: `error`},
-        results
-      })
-    }
-  }
-
-  restartHandler = () => {
-    this.setState({
-      isQuizFinished: false,
-      currentQuestion: 0,
-      answerState: null,
-      results: {},
-    });
-  }
-
-  isQuizFinished() {
-    return this.props.currentQuestion + 1 === this.props.quiz.length;
-  }
-
+  // переносим логику обработчиков в файл quiz-action-creator.js
   componentDidMount() {
     this.props.fetchQuizById(this.props.match.params.id);
+  }
+
+  // функция, которая будет вызывать action,
+  // в результате которого будет сброс
+  // состояния опроса в изначальное состояние
+  componentWillUnmount() {
+    this.props.resetQuiz();
   }
 
   renderScreen() {
@@ -71,12 +29,12 @@ class Quiz extends Component {
         ? <FinishedQuiz
           quiz={this.props.quiz}
           results={this.props.results}
-          restartHandler={this.restartHandler}
+          restartHandler={this.props.restartQuiz} 
         />
         : <ActiveQuiz
           answers={this.props.quiz[this.props.currentQuestion].answers}
           question={this.props.quiz[this.props.currentQuestion].question}
-          answerClickHandler={this.answerClickHandler}
+          answerClickHandler={this.props.checkAnswer}
           questionAmount={this.props.quiz.length}
           currentQuestion={this.props.currentQuestion + 1}
           answerState={this.props.answerState}
@@ -113,7 +71,12 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    fetchQuizById: (id) => dispatch(fetchQuizAction(id))
+    fetchQuizById: (id) => dispatch(fetchQuizAction(id)),
+
+    // переносим обработчики в пропсы
+    checkAnswer: (answerId) => dispatch(checkAnswer(answerId)),
+    restartQuiz: () => dispatch(restartQuiz()), // пройти опрос заново
+    resetQuiz: () => dispatch(restartQuiz()), // сбросить результаты при переключении опросов или экранов. Используется restartQuiz!
   }
 }
 
