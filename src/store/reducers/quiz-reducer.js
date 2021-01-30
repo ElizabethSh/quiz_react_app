@@ -22,8 +22,8 @@ const quizReducer = (state = initialState, action) => {
     case QUIZ.FETCH_SUCCESS:
       return ({...state, isLoading: false, quiz: action.payload});
 
-    case QUIZ.RESTART: 
-      return {...state, 
+    case QUIZ.RESTART:
+      return {...state,
         isQuizFinished: false,
         currentQuestion: 0,
         answerState: null,
@@ -36,7 +36,7 @@ const quizReducer = (state = initialState, action) => {
         answerState: action.answerState,
       }
 
-    case QUIZ.FINISHED: 
+    case QUIZ.FINISHED:
       return {...state,
         isQuizFinished: true, // если вопросы кочились, то isQuizFinished = true
       }
