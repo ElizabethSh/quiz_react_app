@@ -2,7 +2,8 @@ import {React, Component} from 'react';
 import './Auth.css';
 import Button from '../../components/UI/Button/Button';
 import Input from '../../components/UI/Input/Input';
-import axios from 'axios';
+import { connect } from 'react-redux';
+import { auth } from '../../store/actions/auth';
 
 const validateEmail = email => {
   const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -40,34 +41,32 @@ class Auth extends Component {
     }
   }
 
-  loginHandler = async () => {
-    const authData = {
-      email: this.state.formControls.email.value,
-      password: this.state.formControls.password.value,
-      returnSecureToken: true,
-    }
+  loginHandler = () => {
+    // 3. Вызываем метод this.props.auth и передаем в него
+    // значения из объекта authData, а сам объект за
+    // ненадобностью удаляем.
+    // В качестве аргумента isLogin передаем true!
+    this.props.auth(
+      this.state.formControls.email.value,
+      this.state.formControls.password.value,
+      true
+    )
 
-    try {
-      const response = await axios.post(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyCCVlUm9l1LKdRU0M7SIpTipojZMdnt2u0`, authData);
-      console.log(response.data);
-    } catch(err) {
-      console.log(err);
-    }
+    // 7 Переносим логику в функцию auth в actions.auth.js
   }
 
-  registrHandler = async() => {
-    const authData = {
-      email: this.state.formControls.email.value,
-      password: this.state.formControls.password.value,
-      returnSecureToken: true,
-    }
-
-    try {
-      const response = await axios.post(`https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyCCVlUm9l1LKdRU0M7SIpTipojZMdnt2u0`, authData);
-      console.log(response.data);
-    } catch(err) {
-      console.log(err);
-    }
+  registrHandler = () => {
+    // 4. Вызываем метод this.props.auth и передаем в него
+    // значения из объекта authData, а сам объект за
+    // ненадобностью удаляем.
+    // В качестве аргумента isLogin передаем false!
+    this.props.auth(
+      this.state.formControls.email.value,
+      this.state.formControls.password.value,
+      false
+    )
+    
+    // 16. Вся логика теперь в редаксе
   }
 
   submitHandler = (e) => {
@@ -166,4 +165,17 @@ class Auth extends Component {
   }
 }
 
-export default Auth;
+// 2. Создаем функцию mapDispatchToProps
+const mapDispatchToProps = (dispatch) => {
+  return {
+    // 2.1 которая будет возвращать функцию auth, принимающую 3 параметра,
+    // которая будет диспатчить функцию auth, принимающую эти же параметры
+    // isLogin определяет залогинен пользователь или нет
+    auth: (email, password, isLogin) => dispatch(auth(email, password, isLogin))
+  }
+}
+
+// 1. Подключаем компонент к редаксу и передаем в нее только функцию
+// mapDispatchToProps, т.к. мы не используем state из редьюсера,
+// поэтому вместо первого параметра передаем null
+export default connect(null, mapDispatchToProps)(Auth);

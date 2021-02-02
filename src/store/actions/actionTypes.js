@@ -14,3 +14,8 @@ export const QUIZ = {
 
 export const CREATE_QUESTION = `CREATE_QUESTION`;
 export const ADD_QUIZ = `ADD_QUIZ`;
+
+export const AUTH = {
+  SUCCESS: `AUTH_SUCCESS`,
+  LOGOUT: `AUTH_LOGOUT`,
+}
