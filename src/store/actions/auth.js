@@ -115,4 +115,4 @@ const authLogout = () => {
   }
 }
 
-export {auth};
+export {auth, authLogout};
