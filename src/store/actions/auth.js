@@ -93,15 +93,14 @@ const authSuccess = (token) => {
 // будет диспатчить actionCreator, который будет разлогинивать 
 const autoLogout = (time) => {
 
-  // 15. при разлогинивании очищаем localStorage
-  localStorage.removeItem(`token`);
-  localStorage.removeItem(`userId`);
-  localStorage.removeItem(`expirationDate`);
+  // ИСПРАВЛЯЕМ ОШИБКУ ПРОШЛОГО КОММИТА!!!
+  // обнулять хранилище нужно при запуске actionCreator - authLogout!!!
 
   // 12.1 Через переданное в параметр время будет диспатчиться
   // actionCreator authLogout, в результате которого
   // токен в редьюсере authReducer будет обнулен
   return dispatch => {
+
     setTimeout(() => {
       dispatch(authLogout());
     }, time * 1000)
@@ -110,9 +109,67 @@ const autoLogout = (time) => {
 
 // 13 Реализуем actionCreator
 const authLogout = () => {
+  // ИСПРАВЛЯЕМ ОШИБКУ ПРОШЛОГО КОММИТА!!!
+  // обнулять хранилище нужно при запуске actionCreator - authLogout!!!
+
+  // при разлогинивании очищаем localStorage
+  localStorage.removeItem(`token`);
+  localStorage.removeItem(`userId`);
+  localStorage.removeItem(`expirationDate`);
   return {
     type: AUTH.LOGOUT
   }
 }
 
-export {auth, authLogout};
+// 3. Описываем функцию autoLogin, которая будет диспатчиться
+// в компоненте App после его рендера
+const autoLogin = () => {
+  // 3.1 возвращаем из функции autoLogin функцию, в которую передаем
+  // dispatch.
+  return (dispatch) => {
+    // 3.2 Достаем из хранилища токен (если его нет будет null)
+    const token = localStorage.getItem(`token`);
+
+    // 3.3 Проверяем, есть ли токен. Если пользователь авторизовался
+    // (до перезагрузки приложения), то токен будет.
+    
+    // 3.4 Если токена нет, то нужно вызвать разлогинивание
+    if(!token) {
+      dispatch(authLogout());
+      // 3.5 иначе
+    } else {
+
+      // 3.6 Достаем из хранилища время, когда нужно разлогинить пользователя
+      const expirationDate = new Date(localStorage.getItem(`expirationDate`));
+
+      // 3.7 Если время из хранилища меньше текущего, значит
+      // время нахождения в системе истекло и пользователя
+      // нужно разлогинить
+      if (expirationDate <= new Date()) {
+        dispatch(authLogout());
+
+        // 3.8 Иначе
+      } else {
+        // 3.9 Диспатчим actionCreator - authSuccess и передаем токен
+        // в редьюсер authReducer
+        dispatch(authSuccess(token));
+
+        // 3.11 Определим время через которое нужно диспатчить
+        // authLogout:
+        // Из сохраненной в localStorage даты
+        // получаем время в милисекундах (expirationDate.getTime()),
+        // из которой вычитаем текущее время в милисекундах (new Date().getTime())
+        // и эту разницу делим на 1000, чтобы получить время в секундах
+        const time = ((expirationDate.getTime() - new Date().getTime()) / 1000);
+        console.log(time);
+
+        // 3.10 После этого нужно вызвать actionCreator - autoLogout,
+        // который через переданное в его параметр время будет
+        // диспатьчить actionCreator - authLogout
+        dispatch(autoLogout(time));
+      }
+    }
+  }
+}
+
+export {auth, authLogout, autoLogin};

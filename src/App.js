@@ -7,8 +7,16 @@ import QuizCreator from './containers/QuizCreator/QuizCreator';
 import QuizList from './containers/QuizList/QuizList';
 import { connect } from 'react-redux';
 import Logout from './containers/Logout/Logout';
+import { autoLogin } from './store/actions/auth';
 
+// ЗАДАЧА: Добавить функционал запоминания, что пользователь
+// авторизовался и автоматически разлогинивать его через 1 час
 class App extends Component {
+  // 2. После рендера компонента вызываем функцию autoLogin
+  componentDidMount() {
+    this.props.autoLogin();
+  }
+
   render() {
 
     // 4. На основе параметра isAuthenticated определим
@@ -57,5 +65,14 @@ const mapStateToProps = (state) => {
   }
 }
 
+// 1. Создадим функцию mapDispatchToProps
+const mapDispatchToProps = (dispatch) => {
+  return {
+    // 1.1 Возвращаем функцию, которая будет диспатчить функцию,
+    // запоминающую авторизовался пользователь или нет
+    autoLogin: () => dispatch(autoLogin()),
+  }
+}
+
 // 2. Связываем компонент App со store
-export default connect(mapStateToProps)(App);
+export default connect(mapStateToProps, mapDispatchToProps)(App);
