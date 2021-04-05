@@ -1,10 +1,11 @@
-import {React, PureComponent, Fragment} from 'react';
-import './QuizCreator.css';
+import { Fragment, PureComponent, React } from 'react';
+import { connect } from 'react-redux';
 import Button from '../../components/UI/Button/Button';
-import {createControl, validateControl, validateForm} from '../../form/FormFramework/FormFramework';
 import Input from '../../components/UI/Input/Input';
 import Select from '../../components/UI/Select/Select';
-import axios from '../../axios-quiz/axios-quiz';
+import { createControl, validateControl, validateForm } from '../../form/FormFramework/FormFramework';
+import { addQuestion, addQuiz } from '../../store/actions/add-quiz-action-creator';
+import './QuizCreator.css';
 
 const createOptionControl = (number) => createControl(
   {
@@ -32,7 +33,9 @@ const createFormControls = () => {
 
 class QuizCreator extends PureComponent {
   state = {
-    quiz: [],
+    // 1. В этом компоненте будет использоваться
+    // и локальный и глобальный state, поэтому
+    // переносим только quiz в редьюсер createQuizReducer
     correctAnswerId: 1,
     isFormValid: false,
     formControls: createFormControls(),
@@ -43,13 +46,10 @@ class QuizCreator extends PureComponent {
   }
 
   addQuestionHandler = () => {
-    const quiz = this.state.quiz.concat();
-    const index = this.state.quiz.length + 1;
-
     const {question, option1, option2, option3, option4} = this.state.formControls;
 
     const questionItem = {
-      id: index,
+      id: this.props.quiz.length + 1, // оптимизируем код при пом. props
       question: question.value,
       correctAnswer: this.state.correctAnswerId,
       answers: [
@@ -72,51 +72,35 @@ class QuizCreator extends PureComponent {
       ]
     }
 
-    quiz.push(questionItem);
+    // 9. Здесь у нас появляется объект вопроса,
+    // который нужно добавить в массив quiz,
+    // который находится в глобальном state,
+    // поэтому передаем объект созданного вопроса 
+    // в actionCreator - addQuestion
+    this.props.addQuestion(questionItem)
 
+    // 10. quiz убираем, остальное оставляем для изменения
+    // локального state
     this.setState({
-      quiz,
       correctAnswerId: 1,
       isFormValid: false,
       formControls: createFormControls(),
     })
   }
 
-  // 1 способ отправить созданный опрос
-  // addQuizHandler = (e) => {
-  //   e.preventDefault();
-
-  //  axios вернет промис, который можно обработать с помощью
-  //  метода .then и вывести ответ в консоль
-  //  в случае ошибки сработает .catch и ошибку можно вывести в консоль
-  //  axios.post(postURL, this.state.quiz)
-  //    .then(response => console.log(response))
-  //    .catch(error => console.log(error))
-  // }
-
-
-  // 2 способ отправить созданный опрос - асинхронный запрос
-  addQuizHandler = async e => {
+  addQuizHandler = e => {
     e.preventDefault();
 
-    try {
-      // axios вернет промис, оператор await распарсит этот промис
-      // и результат положит в переменную response
-      await axios.post(`/quizes.json`, this.state.quiz) // используем конфиг axios-quiz - полный путь можно не указывать
-
-      // обнуляем state до изначального, чтобы форма создания опроса
-      // возвращалась в изначальное состояние
       this.setState({
-        quiz: [],
         correctAnswerId: 1,
         isFormValid: false,
         formControls: createFormControls(),
       })
-    }
-    // в случае ошибки сработает .catch и ошибку можно вывести в консоль
-    catch(error) {
-      console.log(error);
-    }
+
+    // 13. взаимодействие со state.quiz и обращение к серверу
+    // переносим в actionCreator - addQuiz()
+    // и здесь остается только его вызвать
+      this.props.addQuiz();
   }
 
   changeHandler = (value, controlName) => {
@@ -195,7 +179,7 @@ class QuizCreator extends PureComponent {
             <Button
               type='success'
               onClick={this.addQuizHandler}
-              disabled={this.state.quiz.length === 0}
+              disabled={this.props.quiz.length === 0}
             >Add quiz</Button>
           </form>
         </div>
@@ -204,4 +188,24 @@ class QuizCreator extends PureComponent {
   }
 }
 
-export default QuizCreator;
+// 7. Добываем пропс quiz из глобального state
+const mapStateToProps = (state) => {
+  return {
+    quiz: state.createQuizReducer.quiz,
+  }
+}
+
+// 8. Добавляем сюда методы, которые будут использоваться при взаимодействии
+// с глобальным state
+const mapDispatchToProps = (dispatch) => {
+  return {
+
+    // 9. передаем объект созданного вопроса 
+    // в actionCreator - addQuestion
+    addQuestion: (questionItem) => dispatch(addQuestion(questionItem)), // метод для создания вопроса
+    addQuiz: () => dispatch(addQuiz()), // метод для добавления опроса
+  }
+}
+
+// 5. Связываем компонент с редаксом
+export default connect(mapStateToProps, mapDispatchToProps)(QuizCreator);
